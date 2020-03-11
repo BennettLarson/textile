@@ -13,6 +13,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/textileio/textile/api/buckets/client"
+	"github.com/textileio/textile/api/common"
 )
 
 type serveBucketFileSystem interface {
@@ -58,7 +59,7 @@ func (f *bucketFileSystem) Exists(bucket, pth string) bool {
 
 	ctx, cancel := context.WithTimeout(context.Background(), f.timeout)
 	defer cancel()
-	rep, err := f.client.ListPath(ctx, path.Join(bucket, pth), client.WithDevToken(f.token))
+	rep, err := f.client.ListPath(common.NewDevTokenContext(ctx, f.token), path.Join(bucket, pth))
 	if err == nil && !rep.Item.IsDir {
 		return true
 	}
@@ -68,7 +69,7 @@ func (f *bucketFileSystem) Exists(bucket, pth string) bool {
 func (f *bucketFileSystem) Write(bucket, pth string, writer io.Writer) error {
 	ctx, cancel := context.WithTimeout(context.Background(), f.timeout)
 	defer cancel()
-	return f.client.PullPath(ctx, path.Join(bucket, pth), writer, client.WithDevToken(f.token))
+	return f.client.PullPath(common.NewDevTokenContext(ctx, f.token), path.Join(bucket, pth), writer)
 }
 
 func (f *bucketFileSystem) ValidHost() string {
